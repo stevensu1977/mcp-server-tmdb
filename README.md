@@ -2,6 +2,56 @@
 
 This MCP server integrates with The Movie Database (TMDB) API to provide movie information, search capabilities, and recommendations.
 
+# Prerequisites
+
+Before installing and running the TMDB MCP server, ensure you have the following prerequisites installed and configured:
+
+## Required Software
+
+- **Node.js**
+  - Version 18.0.0 or higher
+  - Download from [Node.js official website](https://nodejs.org/)
+  - Verify installation: `node --version`
+
+- **npm (Node Package Manager)**
+  - Version 8.0.0 or higher (comes with Node.js)
+  - Verify installation: `npm --version`
+
+- **TypeScript**
+  - Will be installed as a project dependency
+  - Can be installed globally: `npm install -g typescript`
+  - Verify installation: `tsc --version`
+
+## Required Accounts & API Keys
+
+- **TMDB Account**
+  - Free account at [TMDB](https://www.themoviedb.org/)
+  - API key from TMDB dashboard
+  - API access must be approved by TMDB
+
+- **Claude Desktop Application**
+  - Latest version installed
+  - Access to modify configuration files
+
+## System Requirements
+
+- **Operating Systems**
+  - macOS (10.15 or later)
+  - Windows 10/11
+  - Linux (modern distributions)
+
+- **Hardware Requirements**
+  - Minimum 4GB RAM
+  - 1GB free disk space
+  - Stable internet connection
+
+## Development Environment
+
+For the best development experience, we recommend:
+- A code editor with TypeScript support (e.g., VS Code)
+- Terminal access
+- Git (for version control)
+
 ## Features
 
 ### Tools

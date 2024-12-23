@@ -1,7 +1,11 @@
 #!/usr/bin/env node
 
+import express from "express";
+
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
+
 import fetch from 'node-fetch';
 import {
   CallToolRequestSchema,
@@ -47,6 +51,8 @@ interface MovieDetails extends Movie {
   };
 }
 
+const app = express();
+
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 
@@ -74,6 +80,7 @@ async function fetchFromTMDB<T>(endpoint: string, params: Record<string, string>
   if (!response.ok) {
     throw new Error(`TMDB API error: ${response.statusText}`);
   }
+  console.log(response.status);
   return response.json() as Promise<T>;
 }
 
@@ -183,8 +190,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   try {
+    console.log("Calling tool:", request.params.name);
     switch (request.params.name) {
       case "search_movies": {
+        console.log("Searching for movies");
         const query = request.params.arguments?.query as string;
         const data = await fetchFromTMDB<TMDBResponse>("/search/movie", { query });
         
@@ -271,14 +280,49 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   }
 });
 
-// Start the server
-if (!TMDB_API_KEY) {
-  console.error("TMDB_API_KEY environment variable is required");
-  process.exit(1);
+// 添加命令行参数解析
+const args = process.argv.slice(2);
+let transportType = 'stdio';  // 默认值
+
+for (let i = 0; i < args.length; i++) {
+  if (args[i].startsWith('--transport=')) {
+    transportType = args[i].split('=')[1];
+  } else if (args[i] === '--transport' && i + 1 < args.length) {
+    transportType = args[i + 1];
+    i++;
+  }
 }
 
-const transport = new StdioServerTransport();
-server.connect(transport).catch((error) => {
-  console.error("Server connection error:", error);
-  process.exit(1);
+// 根据参数选择 transport
+if (transportType === 'sse') {
+  // 启动 Express 服务器和 SSE transport
+  const PORT = process.env.PORT || 3001;
+  app.listen(PORT, () => {
+    console.log(`SSE Server is running on port ${PORT}`);
+  });
+} else {
+  // 启动 stdio transport
+  const transport = new StdioServerTransport();
+  server.connect(transport).catch((error) => {
+    console.error("Server connection error:", error);
+    process.exit(1);
+  });
+}
+
+let transport: SSEServerTransport;
+
+app.get("/sse", async (req:any, res:any) => {
+  console.log("Received connection");
+  transport = new SSEServerTransport("/message", res);
+  await server.connect(transport);
+
+  server.onclose = async () => {
+    await server.close();
+    //process.exit(0);
+  };
+});
+
+app.post("/message", async (req:any, res:any) => {
+  console.log("Received message");
+  await transport.handlePostMessage(req, res);
 });

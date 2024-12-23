@@ -6,7 +6,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc && shx chmod +x dist/*.js",
     "prepare": "npm run build",
-    "watch": "tsc --watch"
+    "watch": "tsc --watch",
+    "dev": "tsc && shx chmod +x dist/*.js && node dist/index.js --transport=sse"
   },
   "keywords": [],
   "author": "",
@@ -14,9 +15,11 @@
   "description": "",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.3",
+    "express": "^4.21.2",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
+    "@types/express": "^5.0.0",
     "@types/node": "^22.10.1",
     "@types/node-fetch": "^2.6.12",
     "shx": "^0.3.4",
